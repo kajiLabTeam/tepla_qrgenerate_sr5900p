@@ -417,30 +417,17 @@ fn print_qr_text(args: &PrintArgs) -> Result<()> {
         image.save("qrcode.png").unwrap();
         td
     };
-    let text_td = {
-        let character_style = MonoTextStyle::new(&FONT_10X20, BinaryColor::On);
-        let text_len = text.len();
-        let margin_px = 4usize;
-        let r = tape_width_px / (20 + margin_px);
-        let mut td = TapeDisplay::new(10 * text_len + margin_px, 20 + margin_px);
-        let tb = TextStyleBuilder::new();
-        let ts = tb
-            .alignment(Alignment::Center)
-            .baseline(Baseline::Middle)
-            .build();
-        Text::with_text_style(text, td.bounding_box().center(), character_style, ts)
-            .draw(&mut td)?;
-        // magnify the td as much as possible to fit the parent
-        td.scaled(r)
-    };
-    let mut td = TapeDisplay::new(qr_td.width + text_td.width, tape_width_px);
+
+    let mut td = TapeDisplay::new(qr_td.width, tape_width_px);
     td.overlay_or(&qr_td, 0, (td.height - qr_td.height) / 2);
-    td.overlay_or(&text_td, qr_td.width, (td.height - text_td.height) / 2);
     print_td(args, &td)
 }
 
 fn print_qr_text_small(args: &PrintArgs) -> Result<()> {
-    let text = args.qr_text_small.as_ref().expect("Please specify --qr-text-small");
+    let text = args
+        .qr_text_small
+        .as_ref()
+        .expect("Please specify --qr-text-small");
     let tape_width_px = determine_tape_width_px(args)? as usize;
     let qr_td = {
         let mut td = TapeDisplay::new(tape_width_px, tape_width_px);
@@ -465,26 +452,9 @@ fn print_qr_text_small(args: &PrintArgs) -> Result<()> {
         image.save("qrcode.png").unwrap();
         td
     };
-    let text_td = {
-        let character_style = MonoTextStyle::new(&FONT_10X20, BinaryColor::On);
-        let text_len = text.len();
-        let margin_px = 4usize;
-        let text_width = 10 * text_len + margin_px;
-        let r = std::cmp::min(tape_width_px / text_width, 8);
-        let mut td = TapeDisplay::new(text_width, 20+margin_px);
-        let tb = TextStyleBuilder::new();
-        let ts = tb
-            .alignment(Alignment::Center)
-            .baseline(Baseline::Middle)
-            .build();
-        Text::with_text_style(text, td.bounding_box().center(), character_style, ts)
-            .draw(&mut td)?;
-        // magnify the td as much as possible to fit the parent
-        td.rotated().scaled(r)
-    };
-    let mut td = TapeDisplay::new(qr_td.width * 9 / 10 + text_td.width, tape_width_px);
+
+    let mut td = TapeDisplay::new(qr_td.width * 9 / 10, tape_width_px);
     td.overlay_or(&qr_td, 0, (td.height - qr_td.height) / 2);
-    td.overlay_or(&text_td, qr_td.width * 9 / 10, (td.height - text_td.height)/2);
     print_td(args, &td)
 }
 
